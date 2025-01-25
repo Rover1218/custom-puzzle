@@ -30,7 +30,6 @@ const Navbar = () => {
         { href: "/", label: "Home" },
         ...(session ? [
             { href: "/generate", label: "Play" },
-            { href: "/profile", label: "Profile" }
         ] : []),
         { href: "/about", label: "About" },
     ];

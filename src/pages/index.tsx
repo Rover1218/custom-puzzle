@@ -21,6 +21,7 @@ import {
 } from "../components/ui/carousel"
 import { ShimmerButton } from "../components/ui/shimmer-button";
 import { Separator } from "../components/ui/separator"
+import Link from 'next/link';
 
 const HomePage = () => {
     const { scrollYProgress } = useScroll();
@@ -103,9 +104,11 @@ const HomePage = () => {
                             whileTap={{ scale: 0.95 }}
                         >
                             <div className="flex justify-center">
-                                <ShimmerButton className="px-12 py-4">
-                                    <span className="text-xl font-bold">Start Creating Now</span>
-                                </ShimmerButton>
+                                <Link href="/generate">
+                                    <ShimmerButton className="px-12 py-4">
+                                        <span className="text-xl font-bold">Start Creating Now</span>
+                                    </ShimmerButton>
+                                </Link>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -265,9 +268,11 @@ const HomePage = () => {
                         </h2>
                         <p className="text-xl text-white/90 mb-8">Join thousands of happy creators today!</p>
                         <div className="flex justify-center">
-                            <ShimmerButton className="px-12 py-4">
-                                <span className="text-xl font-bold">Get Started for Free</span>
-                            </ShimmerButton>
+                            <Link href="/generate">
+                                <ShimmerButton className="px-12 py-4">
+                                    <span className="text-xl font-bold">Get Started for Free</span>
+                                </ShimmerButton>
+                            </Link>
                         </div>
                     </motion.div>
                 </motion.section>
