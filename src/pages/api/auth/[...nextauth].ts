@@ -13,7 +13,7 @@ export const authOptions: AuthOptions = {
                 try {
                     // Add your authentication logic here
                     // For example:
-                    const res = await fetch("http://localhost:3000/api/login", {
+                    const res = await fetch("https://custom-puzzle-rust.vercel.app/login", {
                         method: 'POST',
                         body: JSON.stringify(credentials),
                         headers: { "Content-Type": "application/json" }
