@@ -9,13 +9,15 @@ export const authOptions: AuthOptions = {
                 username: { label: "Username", type: "text" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials) {
+            async authorize(credentials, req) {
                 try {
                     if (!credentials?.username || !credentials?.password) {
                         throw new Error("Missing credentials");
                     }
 
-                    const res = await fetch("/api/login", {
+                    // Use absolute URL for API calls
+                    const baseUrl = process.env.NEXTAUTH_URL || 'https://custom-puzzle-six.vercel.app'
+                    const res = await fetch(`${baseUrl}/api/login`, {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -28,22 +30,18 @@ export const authOptions: AuthOptions = {
 
                     const data = await res.json();
 
-                    if (!res.ok || !data.success) {
+                    if (!res.ok) {
                         throw new Error(data.message || "Authentication failed");
                     }
 
-                    if (data.user) {
-                        return {
-                            id: data.user._id,
-                            name: data.user.username,
-                            email: data.user.email || data.user.username + "@example.com"
-                        };
-                    }
-
-                    throw new Error("No user data returned");
+                    return {
+                        id: data.user?._id || 'default-id',
+                        name: credentials.username,
+                        email: data.user?.email || `${credentials.username}@example.com`
+                    };
                 } catch (error: any) {
-                    console.error("Auth error details:", error);
-                    throw error;
+                    console.error("Auth error:", error.message);
+                    return null;
                 }
             }
         })
@@ -54,18 +52,7 @@ export const authOptions: AuthOptions = {
     },
     session: {
         strategy: "jwt",
-    },
-    jwt: {
         maxAge: 30 * 24 * 60 * 60, // 30 days
-        async encode({ secret, token }) {
-            const encodedToken = Buffer.from(JSON.stringify(token)).toString('base64');
-            return encodedToken;
-        },
-        async decode({ secret, token }) {
-            if (!token) return null;
-            const decodedToken = Buffer.from(token, 'base64').toString();
-            return JSON.parse(decodedToken);
-        }
     },
     callbacks: {
         async jwt({ token, user }) {
@@ -77,8 +64,6 @@ export const authOptions: AuthOptions = {
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id as string;
-                session.user.email = token.email as string;
-                session.user.name = token.name as string;
             }
             return session;
         }
