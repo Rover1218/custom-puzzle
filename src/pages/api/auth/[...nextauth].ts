@@ -15,8 +15,10 @@ export const authOptions: AuthOptions = {
                         throw new Error("Missing credentials");
                     }
 
-                    // Use absolute URL for API calls
-                    const baseUrl = process.env.NEXTAUTH_URL || 'https://custom-puzzle-six.vercel.app'
+                    const baseUrl = 'https://custom-puzzle-six.vercel.app'
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
                     const res = await fetch(`${baseUrl}/api/login`, {
                         method: 'POST',
                         headers: {
@@ -26,22 +28,40 @@ export const authOptions: AuthOptions = {
                             username: credentials.username,
                             password: credentials.password,
                         }),
+                        signal: controller.signal
                     });
 
-                    const data = await res.json();
+                    clearTimeout(timeoutId);
+
+                    let data;
+                    const text = await res.text();
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Failed to parse JSON response:", text);
+                        throw new Error("Invalid server response");
+                    }
 
                     if (!res.ok) {
                         throw new Error(data.message || "Authentication failed");
                     }
 
+                    if (!data.user) {
+                        throw new Error("No user data received");
+                    }
+
                     return {
-                        id: data.user?._id || 'default-id',
+                        id: data.user._id || 'default-id',
                         name: credentials.username,
-                        email: data.user?.email || `${credentials.username}@example.com`
+                        email: data.user.email || `${credentials.username}@example.com`
                     };
                 } catch (error: any) {
                     console.error("Auth error:", error.message);
-                    return null;
+                    // Convert AbortError to a more user-friendly message
+                    if (error.name === 'AbortError') {
+                        throw new Error("Login request timed out");
+                    }
+                    throw error;
                 }
             }
         })
