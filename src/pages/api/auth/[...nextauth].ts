@@ -15,53 +15,53 @@ export const authOptions: AuthOptions = {
                         throw new Error("Missing credentials");
                     }
 
-                    const baseUrl = 'https://custom-puzzle-six.vercel.app'
+                    const baseUrl = process.env.NEXTAUTH_URL || 'https://custom-puzzle-six.vercel.app'
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-                    const res = await fetch(`${baseUrl}/api/login`, {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            username: credentials.username,
-                            password: credentials.password,
-                        }),
-                        signal: controller.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    let data;
-                    const text = await res.text();
                     try {
-                        data = JSON.parse(text);
-                    } catch (e) {
-                        console.error("Failed to parse JSON response:", text);
-                        throw new Error("Invalid server response");
-                    }
+                        const res = await fetch(`${baseUrl}/api/login`, {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                            },
+                            body: JSON.stringify({
+                                username: credentials.username,
+                                password: credentials.password,
+                            }),
+                            signal: controller.signal,
+                            credentials: 'include'
+                        });
 
-                    if (!res.ok) {
-                        throw new Error(data.message || "Authentication failed");
-                    }
+                        clearTimeout(timeoutId);
 
-                    if (!data.user) {
-                        throw new Error("No user data received");
-                    }
+                        if (!res.ok) {
+                            const error = await res.json();
+                            throw new Error(error.message || "Authentication failed");
+                        }
 
-                    return {
-                        id: data.user._id || 'default-id',
-                        name: credentials.username,
-                        email: data.user.email || `${credentials.username}@example.com`
-                    };
+                        const data = await res.json();
+
+                        if (!data.user || !data.user.id) {
+                            throw new Error("Invalid user data received");
+                        }
+
+                        return {
+                            id: data.user.id,
+                            name: credentials.username,
+                            email: data.user.email || `${credentials.username}@example.com`
+                        };
+                    } catch (fetchError: any) {
+                        console.error("Fetch error:", fetchError);
+                        if (fetchError.name === 'AbortError') {
+                            throw new Error("Request timed out");
+                        }
+                        throw new Error(fetchError.message || "Network error");
+                    }
                 } catch (error: any) {
-                    console.error("Auth error:", error.message);
-                    // Convert AbortError to a more user-friendly message
-                    if (error.name === 'AbortError') {
-                        throw new Error("Login request timed out");
-                    }
-                    throw error;
+                    console.error("Auth error details:", error);
+                    return null;
                 }
             }
         })
@@ -82,10 +82,15 @@ export const authOptions: AuthOptions = {
             return token;
         },
         async session({ session, token }) {
-            if (session.user) {
-                session.user.id = token.id as string;
+            try {
+                if (session.user) {
+                    session.user.id = token.id as string;
+                }
+                return session;
+            } catch (error) {
+                console.error("Session callback error:", error);
+                return session;
             }
-            return session;
         }
     },
     secret: process.env.NEXTAUTH_SECRET,
