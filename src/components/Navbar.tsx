@@ -51,10 +51,10 @@ const Navbar = () => {
                 className="bg-white/90 dark:bg-gray-800/90 shadow-lg rounded-b-2xl backdrop-blur-sm fixed w-full top-0 left-0 right-0 z-[100] transition-transform duration-300"
             >
                 <div className="container mx-auto px-6 py-4">
-                    <div className="grid grid-cols-3 items-center">
+                    <div className="grid grid-cols-2 md:grid-cols-3 items-center">
                         {/* Logo Section - Left */}
                         <div className="flex items-center">
-                            <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-gray-100 hover:scale-105 transition-transform">
+                            <Link href="/" className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 hover:scale-105 transition-transform">
                                 Puzzle Generator
                             </Link>
                         </div>
@@ -106,16 +106,16 @@ const Navbar = () => {
                             </div>
 
                             {/* Mobile Menu Button */}
-                            <div className="md:hidden ml-4">
+                            <div className="md:hidden flex items-center justify-end w-full">
                                 <button
                                     onClick={() => setIsOpen(!isOpen)}
                                     className="p-2 rounded-md"
                                     aria-label="Toggle menu"
                                 >
-                                    <div className="w-6 h-5 flex flex-col justify-between">
-                                        <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                                        <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? 'opacity-0' : ''}`} />
-                                        <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                                    <div className="w-6 h-5 flex flex-col justify-between relative">
+                                        <span className={`absolute w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all transform-gpu ${isOpen ? 'rotate-45 top-2' : 'top-0'}`} />
+                                        <span className={`absolute w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all transform-gpu top-2 ${isOpen ? 'opacity-0' : ''}`} />
+                                        <span className={`absolute w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all transform-gpu ${isOpen ? '-rotate-45 top-2' : 'top-4'}`} />
                                     </div>
                                 </button>
                             </div>
