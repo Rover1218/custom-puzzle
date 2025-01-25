@@ -225,11 +225,12 @@ const WordSearch: React.FC<WordSearchProps> = ({ data, isPlaying, isSolved, onCo
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between">
+            <div className="flex flex-col lg:flex-row gap-6">
                 <div
                     ref={gridRef}
                     className="relative"
                     onMouseLeave={handleMouseLeave}
+                    onTouchEnd={handleMouseUp}
                 >
                     {renderSelectionLine()}
                     <div className="grid grid-cols-1 gap-1 relative">
@@ -239,8 +240,8 @@ const WordSearch: React.FC<WordSearchProps> = ({ data, isPlaying, isSolved, onCo
                                     <motion.div
                                         key={`cell-${i}-${j}`}
                                         className={`
-                                            w-10 h-10 flex items-center justify-center
-                                            text-xl font-bold rounded select-none
+                                            w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center
+                                            text-base sm:text-xl font-bold rounded select-none
                                             ${cell.isFound ? 'bg-green-200' : 'bg-white'}
                                             ${selectedCells.some(([r, c]) => r === i && c === j) ? 'bg-blue-200' : ''}
                                             cursor-pointer relative
@@ -248,6 +249,16 @@ const WordSearch: React.FC<WordSearchProps> = ({ data, isPlaying, isSolved, onCo
                                         onMouseDown={() => handleMouseDown(i, j)}
                                         onMouseMove={(e) => handleMouseMove(e, i, j)}
                                         onMouseUp={handleMouseUp}
+                                        onTouchStart={() => handleMouseDown(i, j)}
+                                        onTouchMove={(e) => {
+                                            const touch = e.touches[0];
+                                            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                                            const cellCoords = element?.getAttribute('data-cell')?.split('-');
+                                            if (cellCoords) {
+                                                handleMouseMove(e as any, parseInt(cellCoords[0]), parseInt(cellCoords[1]));
+                                            }
+                                        }}
+                                        data-cell={`${i}-${j}`}
                                     >
                                         {cell.letter}
                                     </motion.div>
@@ -256,21 +267,22 @@ const WordSearch: React.FC<WordSearchProps> = ({ data, isPlaying, isSolved, onCo
                         ))}
                     </div>
                 </div>
-                <div className="ml-8 p-4 bg-white/10 rounded-lg">
+
+                <div className="p-4 bg-white/10 rounded-lg w-full lg:w-48">
                     <h3 className="text-white font-bold mb-4">Words to Find:</h3>
-                    <ul className="space-y-2">
+                    <div className="flex flex-wrap lg:flex-col gap-2">
                         {words.map((word, index) => (
-                            <li
+                            <span
                                 key={word}
                                 className={`${foundWords.includes(word)
-                                    ? 'text-green-400 line-through'
-                                    : 'text-white'
-                                    }`}
+                                        ? 'text-green-400 line-through'
+                                        : 'text-white'
+                                    } px-2 py-1`}
                             >
                                 {word}
-                            </li>
+                            </span>
                         ))}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>

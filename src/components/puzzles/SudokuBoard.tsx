@@ -330,7 +330,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ data, isPlaying, setIsPlaying
             </div>
 
             <motion.div
-                className="inline-block bg-white/10 backdrop-blur-md p-4 rounded-xl shadow-2xl"
+                className="inline-block bg-white/10 backdrop-blur-md p-2 sm:p-4 rounded-xl shadow-2xl"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
             >
@@ -346,11 +346,11 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ data, isPlaying, setIsPlaying
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
                                     className={[
-                                        'w-12 h-12 flex items-center justify-center',
+                                        'w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center',
                                         getBackgroundColor(i, j),
                                         initialBoard[i][j] !== 0 ? 'font-bold' : 'font-normal',
                                         selectedCell?.[0] === i && selectedCell?.[1] === j ? 'ring-2 ring-blue-500' : '',
-                                        'text-xl cursor-pointer transition-all duration-200',
+                                        'text-base sm:text-xl cursor-pointer transition-all duration-200',
                                         'hover:bg-opacity-90',
                                         (j + 1) % 3 === 0 && j !== 8 ? 'border-r-2 border-gray-600' : '',
                                         (i + 1) % 3 === 0 && i !== 8 ? 'border-b-2 border-gray-600' : '',

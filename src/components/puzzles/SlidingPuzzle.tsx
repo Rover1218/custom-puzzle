@@ -10,21 +10,23 @@ interface SlidingTileProps {
     size: number;
 }
 
+// Update the SlidingTile component to be responsive
 const SlidingTile: React.FC<SlidingTileProps> = ({ number, position, onClick, size }) => (
     <motion.div
         className="absolute bg-white rounded-lg flex items-center justify-center cursor-pointer
-                   shadow-lg hover:shadow-xl transition-shadow font-bold text-2xl"
+                   shadow-lg hover:shadow-xl transition-shadow font-bold text-lg sm:text-2xl"
         style={{
-            width: size === 3 ? '80px' : '60px',
-            height: size === 3 ? '80px' : '60px'
+            width: size === 3 ? 'calc(min(80px, 25vw))' : 'calc(min(60px, 25vw))',
+            height: size === 3 ? 'calc(min(80px, 25vw))' : 'calc(min(60px, 25vw))'
         }}
         initial={false}
         animate={{
-            x: position.x,
-            y: position.y,
+            x: `calc(${position.x / (size === 3 ? 85 : 65)} * min(85px, 26vw))`,
+            y: `calc(${position.y / (size === 3 ? 85 : 65)} * min(85px, 26vw))`,
             scale: 1
         }}
         whileHover={{ scale: 0.95 }}
+        whileTap={{ scale: 0.95 }}
         transition={{
             type: "spring",
             stiffness: 300,
@@ -134,15 +136,15 @@ const SlidingPuzzle: React.FC<PuzzleProps> = ({ data, isPlaying, isSolved, onCom
 
     return (
         <div className="space-y-6">
-            <div className="text-white text-xl mb-4">
+            <div className="text-white text-xl mb-4 text-center sm:text-left">
                 Moves: <span className="font-bold">{moves}</span>
             </div>
 
             <div
                 className="relative bg-white/10 p-2 rounded-lg mx-auto"
                 style={{
-                    width: size === 3 ? '260px' : '200px',
-                    height: size === 3 ? '260px' : '200px'
+                    width: size === 3 ? 'min(260px, 80vw)' : 'min(200px, 80vw)',
+                    height: size === 3 ? 'min(260px, 80vw)' : 'min(200px, 80vw)'
                 }}
             >
                 {tiles.map((tile, index) => (
@@ -158,8 +160,8 @@ const SlidingPuzzle: React.FC<PuzzleProps> = ({ data, isPlaying, isSolved, onCom
                 ))}
             </div>
 
-            <div className="text-center text-white/70">
-                Click tiles next to the empty space to move them
+            <div className="text-center text-white/70 text-sm sm:text-base px-4">
+                Tap or click tiles next to the empty space to move them
             </div>
 
             {showCompletion && (

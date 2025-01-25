@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
 import '../app/globals.css';
 import { useSession, getSession } from 'next-auth/react';
+import Head from 'next/head';
 
 // Add type definitions
 type PuzzleType = 'sudoku' | 'word' | 'sliding';
@@ -243,77 +244,104 @@ const PuzzleResult = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-16">
-            <motion.div
-                className="container mx-auto px-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
-                <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl">
-                    <div className="text-center mb-8">
+        <>
+            <Head>
+                <link
+                    rel="icon"
+                    type="image/png"
+                    sizes="512x512"
+                    href="https://cdn-icons-png.flaticon.com/512/4489/4489661.png"
+                />
+                <link
+                    rel="icon"
+                    type="image/png"
+                    sizes="256x256"
+                    href="https://cdn-icons-png.flaticon.com/256/4489/4489661.png"
+                />
+                <link
+                    rel="icon"
+                    type="image/png"
+                    sizes="128x128"
+                    href="https://cdn-icons-png.flaticon.com/128/4489/4489661.png"
+                />
+                <link
+                    rel="apple-touch-icon"
+                    href="https://cdn-icons-png.flaticon.com/512/4489/4489661.png"
+                />
+                <title>Puzzle Result - Custom Puzzle Generator</title>
+            </Head>
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-16">
+                <motion.div
+                    className="container mx-auto px-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl">
+                        <div className="text-center mb-8">
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="text-6xl mb-4"
+                            >
+                                {PuzzleMetrics[type as PuzzleType]?.icon || "🎮"}
+                            </motion.div>
+                            <h1 className="text-4xl font-bold text-white mb-2">
+                                Puzzle Completed!
+                            </h1>
+                            <Badge variant="secondary" className="text-lg px-4 py-1">
+                                {type?.toString().toUpperCase()}
+                            </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 mb-8">
+                            {type && PuzzleMetrics[type as PuzzleType]?.metrics.map((metric) => (
+                                <motion.div
+                                    key={metric}
+                                    className="bg-white/5 rounded-xl p-4 text-center"
+                                    initial={{ x: -20, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                >
+                                    <div className="text-white/60 text-sm mb-1">
+                                        {PuzzleMetrics[type as PuzzleType].labels[metric]}
+                                    </div>
+                                    <div className="text-3xl font-bold text-white">
+                                        {getMetricValue(metric, router.query[metric])}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+
                         <motion.div
+                            className="text-center mb-8"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="text-6xl mb-4"
                         >
-                            {PuzzleMetrics[type as PuzzleType]?.icon || "🎮"}
+                            <div className="text-4xl font-bold mb-2">
+                                Grade: <span className="text-purple-400">{getGradeAndMessage().grade}</span>
+                            </div>
+                            <div className="text-white/80">
+                                {getGradeAndMessage().message}
+                            </div>
                         </motion.div>
-                        <h1 className="text-4xl font-bold text-white mb-2">
-                            Puzzle Completed!
-                        </h1>
-                        <Badge variant="secondary" className="text-lg px-4 py-1">
-                            {type?.toString().toUpperCase()}
-                        </Badge>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-6 mb-8">
-                        {type && PuzzleMetrics[type as PuzzleType]?.metrics.map((metric) => (
-                            <motion.div
-                                key={metric}
-                                className="bg-white/5 rounded-xl p-4 text-center"
-                                initial={{ x: -20, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                            >
-                                <div className="text-white/60 text-sm mb-1">
-                                    {PuzzleMetrics[type as PuzzleType].labels[metric]}
-                                </div>
-                                <div className="text-3xl font-bold text-white">
-                                    {getMetricValue(metric, router.query[metric])}
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    <motion.div
-                        className="text-center mb-8"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                    >
-                        <div className="text-4xl font-bold mb-2">
-                            Grade: <span className="text-purple-400">{getGradeAndMessage().grade}</span>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Link href="/generate" className="block">
+                                <ShimmerButton className="w-full">
+                                    Try Another Puzzle
+                                </ShimmerButton>
+                            </Link>
+                            <Link href="/" className="block">
+                                <ShimmerButton className="w-full bg-purple-600">
+                                    Back to Home
+                                </ShimmerButton>
+                            </Link>
                         </div>
-                        <div className="text-white/80">
-                            {getGradeAndMessage().message}
-                        </div>
-                    </motion.div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <Link href="/generate" className="block">
-                            <ShimmerButton className="w-full">
-                                Try Another Puzzle
-                            </ShimmerButton>
-                        </Link>
-                        <Link href="/" className="block">
-                            <ShimmerButton className="w-full bg-purple-600">
-                                Back to Home
-                            </ShimmerButton>
-                        </Link>
+                        {/* Progress Chart or History could be added here */}
                     </div>
-
-                    {/* Progress Chart or History could be added here */}
-                </div>
-            </motion.div>
-        </div>
+                </motion.div>
+            </div>
+        </>
     );
 };
 

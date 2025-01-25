@@ -120,14 +120,14 @@ const PuzzleBoard: React.FC<PuzzleBoardProps> = ({ puzzleType, puzzleData, onCom
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white/5 p-4 rounded-lg">
+            <div className="flex flex-col sm:flex-row justify-between items-center bg-white/5 p-4 rounded-lg gap-4">
                 <Timer
                     isRunning={isPlaying && hasStarted && puzzleType === currentPuzzleType}
                     onTimeUpdate={setTime}
-                    className="text-2xl font-mono text-white"
+                    className="text-xl sm:text-2xl font-mono text-white"
                     puzzleType={puzzleType} // Pass puzzle type to Timer
                 />
-                <div className="space-x-4">
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-end">
                     {!hasStarted ? (
                         <Button
                             onClick={handleStartGame}
@@ -140,7 +140,7 @@ const PuzzleBoard: React.FC<PuzzleBoardProps> = ({ puzzleType, puzzleData, onCom
                             <Button
                                 onClick={() => setIsPlaying(!isPlaying)}
                                 variant={isPlaying ? "destructive" : "default"}
-                                className="min-w-[100px]"
+                                className="min-w-[90px] sm:min-w-[100px]"
                             >
                                 {isPlaying ? "Pause" : "Resume"}
                             </Button>
@@ -150,7 +150,7 @@ const PuzzleBoard: React.FC<PuzzleBoardProps> = ({ puzzleType, puzzleData, onCom
                                     disabled={isSolved || isAutoSolving}
                                     className="bg-purple-600 hover:bg-purple-700"
                                 >
-                                    Auto Solve
+                                    Solve
                                 </Button>
                             )}
                             <Button
