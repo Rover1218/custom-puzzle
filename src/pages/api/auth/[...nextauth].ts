@@ -11,21 +11,39 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials) {
                 try {
-                    // Add your authentication logic here
-                    // For example:
-                    const res = await fetch("https://custom-puzzle-rust.vercel.app/login", {
-                        method: 'POST',
-                        body: JSON.stringify(credentials),
-                        headers: { "Content-Type": "application/json" }
-                    });
-                    const user = await res.json();
-
-                    if (user) {
-                        return user;
+                    if (!credentials?.username || !credentials?.password) {
+                        throw new Error("Missing credentials");
                     }
-                    return null;
-                } catch (error) {
-                    return null;
+
+                    const res = await fetch("https://custom-puzzle-rust.vercel.app/api/login", {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            username: credentials.username,
+                            password: credentials.password,
+                        }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || "Authentication failed");
+                    }
+
+                    if (data.user) {
+                        return {
+                            id: data.user._id,
+                            name: data.user.username,
+                            email: data.user.email || data.user.username + "@example.com"
+                        };
+                    }
+
+                    throw new Error("No user data returned");
+                } catch (error: any) {
+                    console.error("Auth error details:", error);
+                    throw error;
                 }
             }
         })

@@ -21,17 +21,28 @@ const Login = () => {
         setIsLoading(true)
         setError("")
 
-        const formData = new FormData(e.currentTarget)
-        const response = await signIn('credentials', {
-            username: formData.get('username'),
-            password: formData.get('password'),
-            redirect: false,
-        })
+        try {
+            const result = await signIn('credentials', {
+                username: username,
+                password: password,
+                redirect: false,
+            })
 
-        if (response?.ok) {
-            router.push('/')
-        } else {
-            setError("An error occurred during login")
+            if (result?.error) {
+                setError(result.error)
+                setIsLoading(false)
+                return
+            }
+
+            if (result?.ok) {
+                router.push('/')
+            } else {
+                setError("Failed to login. Please try again.")
+                setIsLoading(false)
+            }
+        } catch (err) {
+            console.error("Login error:", err)
+            setError("An unexpected error occurred")
             setIsLoading(false)
         }
     }

@@ -3,50 +3,63 @@ import connectDB from "../../lib/mongodb";
 import User from "../../models/User";
 
 const handler = async (req, res) => {
-    if (req.method === "POST") {
+    if (req.method !== "POST") {
+        return res.status(405).json({ success: false, message: "Method not allowed" });
+    }
+
+    try {
+        await connectDB();
         const { username, password } = req.body;
 
-        try {
-            await connectDB();
+        console.log("Login attempt for username:", username); // Debug log
 
-            // Find user by username
-            const user = await User.findOne({ username });
-
-            if (!user) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid username or password"
-                });
-            }
-
-            const isMatch = await bcrypt.compare(password, user.password);
-
-            if (!isMatch) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid username or password"
-                });
-            }
-
-            // Return user data without sensitive information
-            res.status(200).json({
-                success: true,
-                message: "Login successful",
-                user: {
-                    username: user.username,
-                    email: user.email,
-                    fullName: user.fullName
-                }
-            });
-        } catch (error) {
-            console.error('Login error:', error);
-            res.status(500).json({
+        if (!username || !password) {
+            return res.status(400).json({
                 success: false,
-                message: "An error occurred during login"
+                message: "Please provide both username and password"
             });
         }
-    } else {
-        res.status(405).json({ success: false, message: "Method not allowed" });
+
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            console.log("User not found:", username); // Debug log
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials"
+            });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            console.log("Password mismatch for user:", username); // Debug log
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials"
+            });
+        }
+
+        // Return user without password
+        const userWithoutPassword = {
+            _id: user._id.toString(),
+            username: user.username,
+            email: user.email || `${user.username}@example.com`,
+        };
+
+        console.log("Login successful for user:", username); // Debug log
+
+        return res.status(200).json({
+            success: true,
+            user: userWithoutPassword
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
     }
 };
 
