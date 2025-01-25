@@ -8,6 +8,8 @@ import { useEffect } from 'react';
 import '../app/globals.css';
 import { useSession, getSession } from 'next-auth/react';
 import Head from 'next/head';
+import { useAuth } from '../hooks/useAuth';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 // Add type definitions
 type PuzzleType = 'sudoku' | 'word' | 'sliding';
@@ -57,38 +59,26 @@ const PuzzleMetrics: PuzzleMetricsType = {
 
 const PuzzleResult = () => {
     const router = useRouter();
-    const { data: session, status } = useSession();
+    const { user, loading } = useAuth(true);
     const { type, score, time, mistakes } = router.query;
 
     useEffect(() => {
-        // Redirect to login if not authenticated
-        if (status === 'unauthenticated') {
-            router.replace('/login');
-        }
-    }, [status, router]);
-
-    useEffect(() => {
-        if (score && status === 'authenticated') {
+        if (score && user) {
             confetti({
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 }
             });
         }
-    }, [score, status]);
+    }, [score, user]);
 
     // Show loading state
-    if (status === 'loading') {
+    if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
                 <div className="text-white text-xl">Loading...</div>
             </div>
         );
-    }
-
-    // Show error if not authenticated
-    if (status === 'unauthenticated') {
-        return null; // Will redirect to login
     }
 
     // Update the validation check at the start of the component
@@ -244,7 +234,7 @@ const PuzzleResult = () => {
     };
 
     return (
-        <>
+        <ProtectedRoute>
             <Head>
                 <link
                     rel="icon"
@@ -341,26 +331,8 @@ const PuzzleResult = () => {
                     </div>
                 </motion.div>
             </div>
-        </>
+        </ProtectedRoute>
     );
 };
-
-// Add getServerSideProps to enforce authentication
-export async function getServerSideProps(context: any) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {
-            redirect: {
-                destination: '/auth/signin',
-                permanent: false,
-            },
-        };
-    }
-
-    return {
-        props: { session }
-    };
-}
 
 export default PuzzleResult;

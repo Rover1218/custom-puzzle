@@ -1,10 +1,10 @@
 // src/pages/generate.tsx
-import { useSession, getSession } from 'next-auth/react';
-import { GetServerSideProps } from 'next';
 import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import PuzzleGenerator from '../components/PuzzleGenerator';
 import PuzzleBoard from '../components/PuzzleBoard';
 import Navbar from '../components/Navbar';
+import ProtectedRoute from '../components/ProtectedRoute';
 import '../app/globals.css';
 import { motion } from 'framer-motion';
 import {
@@ -31,28 +31,19 @@ type PuzzleInfoMap = {
     [K in PuzzleType]: PuzzleInfo;
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {
-            redirect: {
-                destination: '/login',
-                permanent: false,
-            },
-        };
-    }
-
-    return {
-        props: {},
-    };
-};
-
 const GeneratePage = () => {
-    const { data: session } = useSession();
+    const { user, loading } = useAuth(true);
     const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleType | ''>('');
     const [puzzleData, setPuzzleData] = useState(null);
-    const [resetKey, setResetKey] = useState(0); // Add reset key for PuzzleBoard
+    const [resetKey, setResetKey] = useState(0);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+                <div className="text-white text-xl">Loading...</div>
+            </div>
+        );
+    }
 
     const puzzleInfo: PuzzleInfoMap = {
         sudoku: {
@@ -75,12 +66,8 @@ const GeneratePage = () => {
         }
     } as const;
 
-    if (!session) {
-        return <div>Please sign in to access this page</div>;
-    }
-
     return (
-        <>
+        <ProtectedRoute>
             <Head>
                 <link
                     rel="icon"
@@ -235,7 +222,7 @@ const GeneratePage = () => {
                     </motion.div>
                 </ClickSpark>
             </div>
-        </>
+        </ProtectedRoute>
     );
 };
 

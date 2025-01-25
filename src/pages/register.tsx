@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from 'next/router';
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AuthLayout from "../components/AuthLayout";
@@ -8,6 +9,7 @@ import '../app/globals.css';
 import Head from 'next/head';
 
 const Register = () => {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -27,10 +29,22 @@ const Register = () => {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!formData.username || !formData.email || !formData.fullName || !formData.password || !formData.confirmPassword) {
+            setError("Please fill in all fields");
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            setError("Password must be at least 6 characters long");
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
             return;
         }
+
         setIsLoading(true);
         setError("");
 
@@ -47,13 +61,18 @@ const Register = () => {
             });
 
             const data = await response.json();
+
             if (data.success) {
-                window.location.href = "/login";
+                // Store the token and user data
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                await router.push('/');
             } else {
-                setError(data.message);
+                setError(data.message || "Registration failed");
             }
         } catch (err) {
             setError("An error occurred during registration");
+            console.error("Registration error:", err);
         } finally {
             setIsLoading(false);
         }

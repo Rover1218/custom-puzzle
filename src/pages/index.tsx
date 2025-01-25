@@ -114,7 +114,7 @@ const HomePage = () => {
                                 variants={itemVariants}
                                 className="text-7xl font-extrabold text-white mb-6 drop-shadow-lg"
                             >
-                                <SparklesText text="Create Amazing Puzzles" />
+                                <SparklesText text="Play Amazing Puzzles" />
                             </motion.h1>
                             <motion.p
                                 variants={itemVariants}

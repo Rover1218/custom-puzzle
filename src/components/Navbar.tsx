@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { useSession, signOut } from "next-auth/react"; // Add this import
 import Link from 'next/link';
+import { useAuth } from '../hooks/useAuth';
 import { CoolMode } from "../components/ui/cool-mode";
 import { motion, AnimatePresence } from 'framer-motion';
 import { InteractiveHoverButton } from "../components/ui/interactive-hover-button";
 import { Separator } from "../components/ui/separator"
 import { useScrollDirection } from '../hooks/useScrollDirection';
+
+const MENU_ITEMS = [
+    { href: "/", label: "Home" },
+    { href: "/generate", label: "Play", protected: true },
+    { href: "/about", label: "About" },
+];
 
 const NavbarWrapper = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -18,21 +24,18 @@ const NavbarWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const { data: session, status } = useSession(); // Replace the local state with session
+    const { isAuthenticated, user, loading, logout } = useAuth(false);
     const scrollDirection = useScrollDirection();
 
-    const handleLogout = async () => {
-        await signOut({ callbackUrl: '/' });
+    const handleLogout = () => {
+        logout();
     };
 
-    // Update menuItems to include Profile option when logged in
-    const menuItems = [
-        { href: "/", label: "Home" },
-        ...(session ? [
-            { href: "/generate", label: "Play" },
-        ] : []),
-        { href: "/about", label: "About" },
-    ];
+    const menuItemsToDisplay = isAuthenticated ? MENU_ITEMS : MENU_ITEMS.filter(item => !item.protected);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <NavbarWrapper>
@@ -48,8 +51,8 @@ const Navbar = () => {
                 className="bg-white/90 dark:bg-gray-800/90 shadow-lg rounded-b-2xl backdrop-blur-sm fixed w-full top-0 left-0 right-0 z-[100] transition-transform duration-300"
             >
                 <div className="container mx-auto px-6 py-4">
-                    <div className="flex justify-between items-center">
-                        {/* Logo Section */}
+                    <div className="grid grid-cols-3 items-center">
+                        {/* Logo Section - Left */}
                         <div className="flex items-center">
                             <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-gray-100 hover:scale-105 transition-transform">
                                 Puzzle Generator
@@ -57,32 +60,42 @@ const Navbar = () => {
                         </div>
 
                         {/* Desktop Navigation - Center */}
-                        <div className="hidden md:flex items-center justify-center space-x-6">
-                            {menuItems.map((item, index) => (
-                                <React.Fragment key={item.href}>
-                                    <CoolMode>
-                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                                            <Link href={item.href} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all">
-                                                {item.label}
-                                            </Link>
-                                        </motion.div>
-                                    </CoolMode>
-                                    {index < menuItems.length - 1 && (
-                                        <Separator orientation="vertical" className="h-6" />
-                                    )}
-                                </React.Fragment>
-                            ))}
+                        <div className="hidden md:flex items-center justify-center">
+                            <div className="flex items-center space-x-6">
+                                {menuItemsToDisplay.map((item, index) => (
+                                    <React.Fragment key={item.href}>
+                                        <CoolMode>
+                                            <motion.div
+                                                whileHover={{ scale: 1.1 }}
+                                                whileTap={{ scale: 0.95 }}
+                                            >
+                                                <Link href={item.href} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all px-2">
+                                                    {item.label}
+                                                </Link>
+                                            </motion.div>
+                                        </CoolMode>
+                                        {index < menuItemsToDisplay.length - 1 && (
+                                            <Separator orientation="vertical" className="h-6" />
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Desktop Auth Button and Mobile Menu Button */}
-                        <div className="flex items-center">
+                        {/* Desktop Auth Button and Mobile Menu Button - Right */}
+                        <div className="flex items-center justify-end">
                             <div className="hidden md:block">
-                                {session ? (
-                                    <InteractiveHoverButton>
-                                        <button onClick={handleLogout} type="button">
-                                            Logout
-                                        </button>
-                                    </InteractiveHoverButton>
+                                {isAuthenticated ? (
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-gray-700 dark:text-gray-300">
+                                            {user?.username || user?.email}
+                                        </span>
+                                        <InteractiveHoverButton>
+                                            <button onClick={handleLogout} type="button">
+                                                Logout
+                                            </button>
+                                        </InteractiveHoverButton>
+                                    </div>
                                 ) : (
                                     <Link href="/login">
                                         <InteractiveHoverButton>
@@ -122,7 +135,7 @@ const Navbar = () => {
                     >
                         <div className="bg-white/95 dark:bg-gray-800/95 shadow-lg backdrop-blur-sm min-h-screen px-6 py-4">
                             <div className="flex flex-col space-y-4">
-                                {menuItems.map((item) => (
+                                {menuItemsToDisplay.map((item) => (
                                     <Link
                                         key={item.href}
                                         href={item.href}
@@ -132,7 +145,7 @@ const Navbar = () => {
                                         {item.label}
                                     </Link>
                                 ))}
-                                {session ? (
+                                {isAuthenticated ? (
                                     <button
                                         onClick={() => {
                                             handleLogout();

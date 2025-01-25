@@ -5,7 +5,6 @@ import FormInput from "../components/ui/FormInput"; // Changed from named to def
 import AuthLayout from "../components/AuthLayout";
 import { User, Lock } from 'lucide-react';
 import '../app/globals.css';
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Head from 'next/head';
 
@@ -17,35 +16,38 @@ const Login = () => {
     const router = useRouter()
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsLoading(true)
-        setError("")
+        e.preventDefault();
+        if (!username || !password) {
+            setError("Please fill in all fields");
+            return;
+        }
+        setIsLoading(true);
+        setError("");
 
         try {
-            const result = await signIn('credentials', {
-                username: username,
-                password: password,
-                redirect: false,
-            })
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
 
-            if (result?.error) {
-                setError(result.error)
-                setIsLoading(false)
-                return
-            }
+            const data = await response.json();
 
-            if (result?.ok) {
-                router.push('/')
+            if (data.success) {
+                // Store the token in localStorage
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                router.push('/');
             } else {
-                setError("Failed to login. Please try again.")
-                setIsLoading(false)
+                setError(data.message || 'Login failed');
             }
         } catch (err) {
-            console.error("Login error:", err)
-            setError("An unexpected error occurred")
-            setIsLoading(false)
+            setError("An unexpected error occurred");
+            console.error("Login error:", err);
+        } finally {
+            setIsLoading(false);
         }
-    }
+    };
 
     return (
         <>
