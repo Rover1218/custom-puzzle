@@ -128,37 +128,41 @@ const Navbar = () => {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
+                        initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-[90] md:hidden pt-[76px]"
+                        exit={{ opacity: 0, y: 0 }}
+                        className="fixed top-[76px] left-0 right-0 bottom-0 z-[90] md:hidden"
                     >
-                        <div className="bg-white/95 dark:bg-gray-800/95 shadow-lg backdrop-blur-sm min-h-screen px-6 py-4">
+                        <div
+                            className="bg-white/95 dark:bg-gray-800/95 shadow-lg backdrop-blur-sm h-full px-6 py-4 overflow-y-auto"
+                            style={{ maxHeight: 'calc(100vh - 76px)' }}
+                        >
                             <div className="flex flex-col space-y-4">
                                 {menuItemsToDisplay.map((item) => (
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all text-lg py-2"
+                                        className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all text-lg py-3"
                                         onClick={() => setIsOpen(false)}
                                     >
                                         {item.label}
                                     </Link>
                                 ))}
+                                <Separator className="my-4" />
                                 {isAuthenticated ? (
                                     <button
                                         onClick={() => {
                                             handleLogout();
                                             setIsOpen(false);
                                         }}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-md text-center hover:bg-indigo-700 transition-colors"
+                                        className="bg-indigo-600 text-white px-4 py-3 rounded-md text-center hover:bg-indigo-700 transition-colors mt-2"
                                     >
                                         Logout
                                     </button>
                                 ) : (
                                     <Link
                                         href="/login"
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-md text-center hover:bg-indigo-700 transition-colors"
+                                        className="bg-indigo-600 text-white px-4 py-3 rounded-md text-center hover:bg-indigo-700 transition-colors mt-2"
                                         onClick={() => setIsOpen(false)}
                                     >
                                         Sign Up
