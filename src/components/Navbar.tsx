@@ -25,9 +25,13 @@ const Navbar = () => {
         await signOut({ callbackUrl: '/' });
     };
 
+    // Update menuItems to include Profile option when logged in
     const menuItems = [
         { href: "/", label: "Home" },
-        { href: "/generate", label: "Generate" },
+        ...(session ? [
+            { href: "/generate", label: "Play" },
+            { href: "/profile", label: "Profile" }
+        ] : []),
         { href: "/about", label: "About" },
     ];
 
@@ -47,12 +51,14 @@ const Navbar = () => {
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex justify-between items-center">
                         {/* Logo Section */}
-                        <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-gray-100 hover:scale-105 transition-transform">
-                            Puzzle Generator
-                        </Link>
+                        <div className="flex items-center">
+                            <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-gray-100 hover:scale-105 transition-transform">
+                                Puzzle Generator
+                            </Link>
+                        </div>
 
-                        {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center space-x-6">
+                        {/* Desktop Navigation - Center */}
+                        <div className="hidden md:flex items-center justify-center space-x-6">
                             {menuItems.map((item, index) => (
                                 <React.Fragment key={item.href}>
                                     <CoolMode>
@@ -69,35 +75,39 @@ const Navbar = () => {
                             ))}
                         </div>
 
-                        {/* Desktop Auth Button */}
-                        <div className="hidden md:block">
-                            {session ? (
-                                <InteractiveHoverButton>
-                                    <button onClick={handleLogout} type="button">
-                                        Logout
-                                    </button>
-                                </InteractiveHoverButton>
-                            ) : (
-                                <Link href="/login">
+                        {/* Desktop Auth Button and Mobile Menu Button */}
+                        <div className="flex items-center">
+                            <div className="hidden md:block">
+                                {session ? (
                                     <InteractiveHoverButton>
-                                        <span>Sign Up</span>
+                                        <button onClick={handleLogout} type="button">
+                                            Logout
+                                        </button>
                                     </InteractiveHoverButton>
-                                </Link>
-                            )}
-                        </div>
-
-                        {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="md:hidden p-2 rounded-md"
-                            aria-label="Toggle menu"
-                        >
-                            <div className="w-6 h-5 flex flex-col justify-between">
-                                <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                                <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? 'opacity-0' : ''}`} />
-                                <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                                ) : (
+                                    <Link href="/login">
+                                        <InteractiveHoverButton>
+                                            <span>Sign Up</span>
+                                        </InteractiveHoverButton>
+                                    </Link>
+                                )}
                             </div>
-                        </button>
+
+                            {/* Mobile Menu Button */}
+                            <div className="md:hidden ml-4">
+                                <button
+                                    onClick={() => setIsOpen(!isOpen)}
+                                    className="p-2 rounded-md"
+                                    aria-label="Toggle menu"
+                                >
+                                    <div className="w-6 h-5 flex flex-col justify-between">
+                                        <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                                        <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? 'opacity-0' : ''}`} />
+                                        <span className={`w-full h-0.5 bg-gray-600 dark:bg-gray-300 transition-all ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </motion.nav>
