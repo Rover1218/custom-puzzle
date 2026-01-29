@@ -7,7 +7,7 @@ import WordSearch from './puzzles/WordSearch';
 import SlidingPuzzle from './puzzles/SlidingPuzzle';
 // Remove Crossword import
 import type { PuzzleProps } from './puzzles/types';
-import { solveSudoku } from '../utils/puzzleUtils';
+
 
 interface PuzzleBoardProps {
     puzzleType: string;
